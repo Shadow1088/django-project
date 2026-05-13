@@ -1,0 +1,58 @@
+Table accounts_user {
+  id integer PK
+  password varchar(128)
+  last_login datetime
+  is_superuser boolean
+  username varchar(150) [unique]
+  first_name varchar(150)
+  last_name varchar(150)
+  email varchar(254)
+  is_staff boolean
+  is_active boolean
+  date_joined datetime
+  role varchar(10) [note: 'admin or driver']
+}
+
+Table accounts_user_groups {
+  id integer PK
+  user_id bigint [ref: > accounts_user.id]
+  group_id integer [ref: > auth_group.id]
+}
+
+Table accounts_user_user_permissions {
+  id integer PK
+  user_id bigint [ref: > accounts_user.id]
+  permission_id integer [ref: > auth_permission.id]
+}
+
+Table auth_group {
+  id integer PK
+  name varchar(150) [unique]
+}
+
+Table auth_permission {
+  id integer PK
+  name varchar(255)
+  content_type_id integer
+  codename varchar(100)
+}
+
+Table tracking_truck {
+  id integer PK
+  plate_number varchar(8) [unique, note: '5–8 characters']
+  description text
+  driver_id bigint [ref: > accounts_user.id, note: 'nullable']
+  is_active boolean
+  created_at datetime
+  updated_at datetime
+}
+
+Table tracking_location {
+  id integer PK
+  truck_id bigint [ref: > tracking_truck.id, note: 'indexed with recorded_at']
+  latitude decimal(9,6)
+  longitude decimal(9,6)
+  speed float [note: 'km/h, nullable']
+  note varchar(255)
+  recorded_at datetime
+}
