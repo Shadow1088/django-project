@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}{{ truck.plate_number }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{{ truck.plate_number }}</h2>
+    <div>
+        {% if user.role == 'admin' %}
+            <a href="{% url 'truck_update' truck.id %}" class="btn btn-outline-primary">Edit</a>
+        {% endif %}
+        <a href="{% url 'truck_list' %}" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-3">
+            <div class="card-header"><h5 class="mb-0">Details</h5></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Plate</dt>
+                    <dd class="col-sm-8">{{ truck.plate_number }}</dd>
+                    <dt class="col-sm-4">Description</dt>
+                    <dd class="col-sm-8">{{ truck.description|default:'—' }}</dd>
+                    <dt class="col-sm-4">Driver</dt>
+                    <dd class="col-sm-8">{{ truck.driver.get_full_name|default:truck.driver.username|default:'—' }}</dd>
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        {% if truck.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </dd>
+                    <dt class="col-sm-4">Created</dt>
+                    <dd class="col-sm-8">{{ truck.created_at|date:'Y-m-d H:i' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow mb-3">
+            <div class="card-header"><h5 class="mb-0">Report Location</h5></div>
+            <div class="card-body">
+                <form method="post" action="{% url 'report_location' truck.id %}">
+                    {% csrf_token %}
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <input type="text" name="latitude" class="form-control" placeholder="Latitude" required>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="longitude" class="form-control" placeholder="Longitude" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Ping</button>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-md-6">
+                            <input type="number" step="0.1" name="speed" class="form-control" placeholder="Speed (km/h)">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="note" class="form-control" placeholder="Note (optional)">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header"><h5 class="mb-0">Recent Locations (last 10)</h5></div>
+    <div class="card-body">
+        {% if locations %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Speed</th>
+                            <th>Note</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loc in locations %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ loc.latitude }}</td>
+                                <td>{{ loc.longitude }}</td>
+                                <td>{{ loc.speed|default:'—' }}{% if loc.speed %} km/h{% endif %}</td>
+                                <td>{{ loc.note|default:'—' }}</td>
+                                <td>{{ loc.recorded_at|date:'Y-m-d H:i:s' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">No location data yet.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
