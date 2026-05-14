@@ -77,3 +77,7 @@ All endpoints return JSON. Authenticate with JWT Bearer token.
 - **SimpleJWT** authentication
 - **SQLite** (dev), easily swappable to PostgreSQL
 - **Bootstrap 5** for browser UI
+
+## DB Schema
+
+![schema image](https://github.com/Shadow1088/django-project/blob/main/schema.png)
