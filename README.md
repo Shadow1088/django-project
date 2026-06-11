@@ -36,6 +36,32 @@ python manage.py runserver
 
 All endpoints return JSON. Authenticate with JWT Bearer token.
 
+### Usage examples
+
+```bash
+# 1. Login — get a token
+curl -X POST http://127.0.0.1:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin"}'
+
+# 2. Use the token on subsequent requests
+TOKEN="eyJhbGciOiJI..."
+curl http://127.0.0.1:8000/api/auth/me/ \
+  -H "Authorization: Bearer $TOKEN"
+
+# 3. Create a truck
+curl -X POST http://127.0.0.1:8000/api/trucks/ \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"plate_number":"AB-1234","description":"Scania R500"}'
+
+# 4. Report a location ping
+curl -X POST http://127.0.0.1:8000/api/locations/ \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"truck":1,"latitude":48.7164,"longitude":21.2611,"speed":65.5}'
+```
+
 ### Auth
 
 | Method | Endpoint | Body | Description |
