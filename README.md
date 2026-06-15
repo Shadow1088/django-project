@@ -103,3 +103,7 @@ curl -X POST http://127.0.0.1:8000/api/locations/ \
 - **SimpleJWT** authentication
 - **SQLite** (dev), easily swappable to PostgreSQL
 - **Bootstrap 5** for browser UI
+
+## DB Schema
+
+![schema image](https://github.com/Shadow1088/django-project/blob/main/schema.png)
