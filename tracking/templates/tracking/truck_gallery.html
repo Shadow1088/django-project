@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Truck Gallery{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Truck Gallery</h2>
+</div>
+
+{% if trucks %}
+    <div class="row g-4">
+        {% for truck in trucks %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow h-100">
+                    <div id="mini-map-{{ truck.id }}" class="mini-map" data-lat="{{ truck.latest_lat }}" data-lng="{{ truck.latest_lng }}" data-speed="{{ truck.latest_speed|default:'' }}" data-time="{{ truck.latest_time|date:'Y-m-d H:i:s'|default:'' }}"></div>
+                    <div class="card-body">
+                        <a href="{% url 'truck_detail' truck.id %}" class="text-decoration-none">
+                            <h5 class="card-title mb-1">{{ truck.plate_number }}</h5>
+                        </a>
+                        <p class="text-muted small mb-2">{{ truck.description|default:'—'|truncatewords:15 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">{{ truck.driver.get_full_name|default:truck.driver.username|default:'No driver' }}</span>
+                            <div>
+                                {% if truck.latest_speed is not None %}
+                                    <span class="badge bg-info">{{ truck.latest_speed }} km/h</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No data</span>
+                                {% endif %}
+                                {% if truck.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if truck.latest_time %}
+                            <div class="small text-muted mt-1">
+                                Last ping: {{ truck.latest_time|date:'Y-m-d H:i' }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">No trucks found.</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.mini-map').forEach(function (el) {
+    var lat = parseFloat(el.dataset.lat);
+    var lng = parseFloat(el.dataset.lng);
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    var map = L.map(el.id, {
+      zoomControl: false,
+      scrollWheelZoom: false,
+      dragging: false,
+      attributionControl: false,
+    }).setView([lat, lng], 15);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    L.marker([lat, lng]).addTo(map);
+  });
+});
+</script>
+{% endblock %}

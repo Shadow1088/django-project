@@ -1,11 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}Trucks{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Trucks</h2>
-    {% if user.role == 'admin' %}
-        <a href="{% url 'truck_create' %}" class="btn btn-success">+ Add Truck</a>
-    {% endif %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h2 class="mb-0">Trucks</h2>
+    <div class="d-flex gap-2 align-items-center">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search plate…" value="{{ request.GET.q }}">
+            <div class="form-check form-switch d-flex align-items-center m-0">
+                <input class="form-check-input" type="checkbox" name="active" id="active-filter" value="true" {% if request.GET.active == 'true' or not request.GET.active %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label small" for="active-filter">Active</label>
+            </div>
+            <button class="btn btn-sm btn-outline-primary">Search</button>
+            {% if request.GET.q or request.GET.active %}
+                <a href="{% url 'truck_list' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+            {% endif %}
+        </form>
+        {% if user.role == 'admin' %}
+            <a href="{% url 'truck_create' %}" class="btn btn-success btn-sm">+ Add Truck</a>
+        {% endif %}
+    </div>
 </div>
 
 {% if trucks %}
@@ -23,7 +36,7 @@
             <tbody>
                 {% for truck in trucks %}
                     <tr>
-                        <td>{{ truck.plate_number }}</td>
+                        <td><strong>{{ truck.plate_number }}</strong></td>
                         <td>{{ truck.description|default:'—'|truncatewords:10 }}</td>
                         <td>{{ truck.driver.get_full_name|default:truck.driver.username|default:'—' }}</td>
                         <td>

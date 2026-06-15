@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Locations{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h2 class="mb-0">Location History</h2>
+    <form method="get" class="d-flex gap-2 align-items-center">
+        <select name="truck" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All trucks</option>
+            {% for truck in trucks %}
+                <option value="{{ truck.id }}" {% if selected_truck|stringformat:'s' == truck.id|stringformat:'s' %}selected{% endif %}>
+                    {{ truck.plate_number }} — {{ truck.driver.get_full_name|default:truck.driver.username|default:'no driver' }}
+                </option>
+            {% endfor %}
+        </select>
+        {% if selected_truck %}
+            <a href="{% url 'location_list' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if locations %}
+    <div class="table-responsive">
+        <table class="table table-sm table-hover table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Truck</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Speed</th>
+                    <th>Note</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loc in locations %}
+                    <tr>
+                        <td>{{ loc.id }}</td>
+                        <td><a href="{% url 'truck_detail' loc.truck.id %}">{{ loc.truck.plate_number }}</a></td>
+                        <td>{{ loc.latitude|floatformat:6 }}</td>
+                        <td>{{ loc.longitude|floatformat:6 }}</td>
+                        <td>{{ loc.speed|default:'—' }}{% if loc.speed %} km/h{% endif %}</td>
+                        <td>{{ loc.note|default:'—' }}</td>
+                        <td>{{ loc.recorded_at|date:'Y-m-d H:i:s' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page_obj.has_other_pages %}
+        <nav>
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_truck %}&truck={{ selected_truck }}{% endif %}">Previous</a></li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}{% if selected_truck %}&truck={{ selected_truck }}{% endif %}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_truck %}&truck={{ selected_truck }}{% endif %}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info">No location records found.</div>
+{% endif %}
+{% endblock %}
